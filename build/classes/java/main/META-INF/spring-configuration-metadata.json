@@ -1,0 +1,66 @@
+{
+  "groups": [
+    {
+      "name": "spring.pulsar",
+      "type": "com.zyb.pulsar.property.PulsarProperty",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.pulsar.connection-timeout",
+      "type": "java.lang.Integer",
+      "description": "连接超时时间, 5秒",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": 5000
+    },
+    {
+      "name": "spring.pulsar.enable-tcp-no-delay",
+      "type": "java.lang.Boolean",
+      "description": "tcp no delay",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.pulsar.io-threads",
+      "type": "java.lang.Integer",
+      "description": "客户端io线程数",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": 1
+    },
+    {
+      "name": "spring.pulsar.keep-alive-interval",
+      "type": "java.lang.Integer",
+      "description": "million second unit",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": 30000
+    },
+    {
+      "name": "spring.pulsar.listener-name",
+      "type": "java.lang.String",
+      "description": "pulsar客户端连接名",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty"
+    },
+    {
+      "name": "spring.pulsar.listener-threads",
+      "type": "java.lang.Integer",
+      "description": "客户端消息监听线程数",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": 1
+    },
+    {
+      "name": "spring.pulsar.operation-timeout",
+      "type": "java.lang.Integer",
+      "description": "million second unit",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty",
+      "defaultValue": 30000
+    },
+    {
+      "name": "spring.pulsar.service-url",
+      "type": "java.lang.String",
+      "description": "pulsar地址:      - pulsar:\/\/localhost:6650      - pulsar+ssl:\/\/localhost:6651",
+      "sourceType": "com.zyb.pulsar.property.PulsarProperty"
+    }
+  ],
+  "hints": []
+}
