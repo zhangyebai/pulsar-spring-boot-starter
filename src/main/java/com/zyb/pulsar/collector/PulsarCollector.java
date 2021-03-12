@@ -154,6 +154,33 @@ public class PulsarCollector implements BeanPostProcessor {
         return Schema.JSON(clazz);
     }
 
+    /**
+     * javadoc newProducer
+     * @apiNote 新生成生产者
+     *
+     * @param topic 队列主题
+     * @param obj 发送对象
+     * @author zhang yebai
+     * @date 2021/3/12 2:52 PM
+     **/
+    public <T> void newProducer(String topic, T obj)  {
+        synchronized (this){
+            final Producer<?> p =  producers.get(topic);
+            if(Objects.nonNull(p)){
+                return;
+            }
+            try{
+                final Producer<?> newP = pulsarClient.newProducer(schema(obj.getClass()))
+                        .topic(topic)
+                        .blockIfQueueFull(true)
+                        .create();
+                producers.putIfAbsent(topic, newP);
+            }catch (Exception ex){
+                log.error("create pulsar producer[" + topic + ", " + obj + "] error: " + ex);
+            }
+        }
+    }
+
     private Producer<?> producer(PulsarProducer<?> pulsarProducer) {
         try {
             return pulsarClient.newProducer(pulsarProducer.getSchema())

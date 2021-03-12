@@ -37,8 +37,8 @@ public class PulsarAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PulsarProducerTemplate<?> pulsarProducerTemplate(PulsarCollector pulsarCollector){
-        return new PulsarProducerTemplate<>(pulsarCollector);
+    public PulsarProducerTemplate pulsarProducerTemplate(PulsarCollector pulsarCollector){
+        return new PulsarProducerTemplate(pulsarCollector);
     }
 
     @Bean

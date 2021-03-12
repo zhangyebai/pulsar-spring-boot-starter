@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * @version 1.0.0
  * @date 2021/3/10 6:43 PM
  **/
-public class PulsarProducerTemplate<T> {
+public class PulsarProducerTemplate {
 
     protected final Log log = LogFactory.getLog(this.getClass());
 
@@ -39,11 +39,16 @@ public class PulsarProducerTemplate<T> {
      * @param topic 发送消息的主题
      * @param message 消息体
      * @return java.util.Optional<org.apache.pulsar.client.api.MessageId>
-     * @author weng xiaoyong
+     * @author zhang yebai
      * @date 2021/3/10 6:59 PM
      **/
-    public Optional<MessageId> send(String topic, T message) {
-        final MessageId id = collector.producer(topic)
+    public <T> Optional<MessageId> send(String topic, T message) {
+        Optional<Producer<T>> opt = collector.producer(topic);
+        if (!opt.isPresent()) {
+            collector.newProducer(topic, message);
+            opt = collector.producer(topic);
+        }
+        final MessageId id = opt
                 .map(p -> {
                     try {
                         return p.send(message);
@@ -63,11 +68,19 @@ public class PulsarProducerTemplate<T> {
      * @param topic 发送消息主题
      * @param message 消息内容
      * @return java.util.Optional<java.util.concurrent.CompletableFuture<org.apache.pulsar.client.api.MessageId>>
-     * @author weng xiaoyong
+     * @author zhang yebai
      * @date 2021/3/10 6:59 PM
      **/
-    public Optional<CompletableFuture<MessageId>> asyncSend(String topic, T message) {
-        return collector.producer(topic).map(p -> p.sendAsync(message));
+    public <T> Optional<CompletableFuture<MessageId>> asyncSend(String topic, T message) {
+        Optional<Producer<T>> opt = collector.producer(topic);
+        if (!opt.isPresent()) {
+            collector.newProducer(topic, message);
+            opt = collector.producer(topic);
+        }
+        final CompletableFuture<MessageId> fid = opt
+                .map(p -> p.sendAsync(message))
+                .orElse(null);
+        return Optional.ofNullable(fid);
     }
 
     public List<Consumer<?>> consumers(){

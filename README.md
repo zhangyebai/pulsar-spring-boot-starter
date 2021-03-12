@@ -53,57 +53,60 @@ class User{
     
     private String userName;
 }
+```
 
-// 生产者声明
-@Configuration
-class PulsarConfig{
+// 生产者声明, 生产者将不再需要显示声明(可以显示声明, 但是非必须)
+
+    @Deprecated // 不再需要手动声明对应的生产者
+    @Configuration
+    class PulsarConfig{
+        
+        /**
+         * Meta producer
+         **/
+        @Bean
+        public PulsarProducer<Meta> metaProducer(){
+            return new PulsarProducer<Meta>()
+                    .setSchema(Schema.JSON(Meta.class))
+                    .setTopic("persistent://${user-name}/${name-space}/${topic}")
+                    .setBlockIfQueueFull(true);
+        }
     
-    /**
-     * Meta producer
-     **/
-    @Bean
-    public PulsarProducer<Meta> metaProducer(){
-        return new PulsarProducer<Meta>()
-                .setSchema(Schema.JSON(Meta.class))
-                .setTopic("persistent://${user-name}/${name-space}/${topic}")
-                .setBlockIfQueueFull(true);
+        /**
+         * user producer
+         **/
+        @Bean
+        public PulsarProducer<User> userProducer(){
+            return new PulsarProducer<User>()
+                    .setSchema(Schema.JSON(User.class))
+                    .setTopic("persistent://${user-name}/${name-space}/${topic}")
+                    .setBlockIfQueueFull(true);
+        }
+    
+        /**
+         * raw producer
+         **/
+        @Bean
+        public PulsarProducer<byte[]> rawProducer(){
+            return new PulsarProducer<byte[]>()
+                    .setSchema(Schema.BYTES)
+                    .setTopic("persistent://${user-name}/${name-space}/${topic}")
+                    .setBlockIfQueueFull(true);
+        }
     }
 
-    /**
-     * user producer
-     **/
-    @Bean
-    public PulsarProducer<User> userProducer(){
-        return new PulsarProducer<User>()
-                .setSchema(Schema.JSON(User.class))
-                .setTopic("persistent://${user-name}/${name-space}/${topic}")
-                .setBlockIfQueueFull(true);
-    }
 
-    /**
-     * raw producer
-     **/
-    @Bean
-    public PulsarProducer<byte[]> rawProducer(){
-        return new PulsarProducer<byte[]>()
-                .setSchema(Schema.BYTES)
-                .setTopic("persistent://${user-name}/${name-space}/${topic}")
-                .setBlockIfQueueFull(true);
-    }
-}
-
+```java
 // 生产者调用
 @Service
 class MessageService{
     
     @Autowired
-    private PulsarProducerTemplate<Meta> metaTemplate;
+    private PulsarProducerTemplate template;
 
-    @Autowired
-    private PulsarProducerTemplate<User> userTemplate;
     
     public void sendMeta(Meta meta){
-        final Optional<MessageId> opt = metaTemplate.send("persistent://${user-name}/${name-space}/${topic}", meta);
+        final Optional<MessageId> opt = template.send("persistent://${user-name}/${name-space}/${topic}", meta);
         if(opt.ifPresent()){
             // ok
         }else{
@@ -112,7 +115,7 @@ class MessageService{
     }
 
     public void sendMessage(User user){
-        final Optional<MessageId> opt = userTemplate.send("persistent://${user-name}/${name-space}/${topic}", user);
+        final Optional<MessageId> opt = template.send("persistent://${user-name}/${name-space}/${topic}", user);
         if(opt.ifPresent()){
             // ok
         }else{
@@ -128,7 +131,7 @@ class MessageService{
 
 ```java
 @Component // or @Service or any other bean definition
-@Slf4j    
+@Slf4j
 class PulsarMessageHandler{
 
     @Consumer(topics = "persistent://${user-name}/${name-space}/${topic}", description = "my test desc", type = Meta.class)
@@ -151,7 +154,7 @@ class PulsarMessageHandler{
 手动确认消息被消费, 入参必须是 pulsar中的(Consumer<?> consumer, Message<?> message) 包裹类, 否则无法手动ack
 ```java
 @Component // or @Service or any other bean definition
-@Slf4j    
+@Slf4j
 class PulsarMessageHandler{
 
     @Consumer(topics = "persistent://${user-name}/${name-space}/${topic}", autoAck = false, description = "my test desc", type = Meta.class)
